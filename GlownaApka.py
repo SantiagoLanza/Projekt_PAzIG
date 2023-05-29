@@ -7,19 +7,25 @@ import os
 import pandas 
 import matplotlib.pyplot as plt
 import numpy as np
-import time
 import subprocess
 import re
 import smtplib
 from email.message import EmailMessage
 from PIL.ExifTags import GPSTAGS, TAGS
 import webbrowser
+import string
+from itertools import product
+from time import time
+from numpy import loadtxt
+from CTkMessagebox import CTkMessagebox
 customtkinter.set_appearance_mode("System")  # Modes: "System" (standard), "Dark", "Light"
 customtkinter.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
 class App(customtkinter.CTk):
+    width = 950
+    height = 650
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        start = time.perf_counter()
+       
 
 
         def get_password():
@@ -90,88 +96,191 @@ class App(customtkinter.CTk):
                 return f"https://maps.google.com/?q={dec_deg_lat},{dec_deg_lon}"
 
 
-            # Converting to decimal degrees for latitude and longitude is from degree/minutes/seconds format is the same for latitude and longitude. So we use DRY principles, and create a seperate function.
+            
             def convert_decimal_degrees(degree, minutes, seconds, direction):
                 decimal_degrees = degree + minutes / 60 + seconds / 3600
-                # A value of "S" for South or West will be multiplied by -1
+                
                 if direction == "S" or direction == "W":
                     decimal_degrees *= -1
                 return decimal_degrees
                     
-            # Add files to the folder ./images
-            # We assign the cwd to a variable. We will refer to it to get the path to images.
+            
             cwd = os.getcwd()
-            # Change the current working directory to the one where you keep your images.
+           
             os.chdir(os.path.join(cwd, "images"))
-            # Get a list of all the files in the images directory.
+           
             files = os.listdir()
 
-            # Check if you have any files in the ./images folder.
+           
             if len(files) == 0:
                 print("You don't have have files in the ./images folder.")
                 exit()
-            # Loop through the files in the images directory.
+            
             for file in files:
-                # We add try except black to handle when there are wrong file formats in the ./images folder.
+               
                 try:
-                    # Open the image file. We open the file in binary format for reading.
+                    
                     image = Image.open(file)
                     print(f"_______________________________________________________________{file}_______________________________________________________________")
-                    # The ._getexif() method returns a dictionary. .items() method returns a list of all dictionary keys and values.
+                   
                     gps_coords = {}
-                    # We check if exif data are defined for the image. 
+                     
                     if image._getexif() == None:
                         print(f"{file} contains no exif data.")
-                    # If exif data are defined we can cycle through the tag, and value for the file.
+                    
                     else:
                         for tag, value in image._getexif().items():
-                            # If you print the tag without running it through the TAGS.get() method you'll get numerical values for every tag. We want the tags in human-readable form. 
-                            # You can see the tags and the associated decimal number in the exif standard here: https://exiv2.org/tags.html
+                            
                             tag_name = TAGS.get(tag)
                             if tag_name == "GPSInfo":
                                 for key, val in value.items():
-                                    # Print the GPS Data value for every key to the screen.
+                                    
                                     print(f"{GPSTAGS.get(key)} - {val}")
-                                    # We add Latitude data to the gps_coord dictionary which we initialized in line 110.
+                                   
                                     if GPSTAGS.get(key) == "GPSLatitude":
                                         gps_coords["lat"] = val
-                                    # We add Longitude data to the gps_coord dictionary which we initialized in line 110.
+                                    
                                     elif GPSTAGS.get(key) == "GPSLongitude":
                                         gps_coords["lon"] = val
-                                    # We add Latitude reference data to the gps_coord dictionary which we initialized in line 110.
+                                    
                                     elif GPSTAGS.get(key) == "GPSLatitudeRef":
                                         gps_coords["lat_ref"] = val
-                                    # We add Longitude reference data to the gps_coord dictionary which we initialized in line 110.
+                                    
                                     elif GPSTAGS.get(key) == "GPSLongitudeRef":
                                         gps_coords["lon_ref"] = val   
                             
                             
-                        # We print the longitudinal and latitudinal data which has been formatted for Google Maps. We only do so if the GPS Coordinates exists. 
+                         
                         if gps_coords:
                             print(create_google_maps_url(gps_coords))
                             webbrowser.open(create_google_maps_url(gps_coords))
-                        # Change back to the original working directory.
+                        
                 except IOError:
                     print("File format not supported!")
  
 
-        def brutforce():
-            print()
+       
+        def product_loop(password, generator):
+                for p in generator:
+                    if ''.join(p) == password:
+                        print('\nPassword:', ''.join(p))
+                        return ''.join(p)
+                return False
+
+
+        def bruteforce(password, max_nchar=8):
+                """Password brute-force algorithm.
+
+                Parameters
+                ----------
+                password : string
+                    To-be-found password.
+                max_nchar : int
+                    Maximum number of characters of password.
+
+                Return
+                ------
+                bruteforce_password : string
+                    Brute-forced password
+                """
+                dlugosc = len(password)
+                if dlugosc < 10:
+                    CTkMessagebox(message="Hasło zostało schakowane",
+                  icon="check", option_1="Thanks")
+                    print('1) Comparing with most common passwords / first names')
+                    common_pass = loadtxt('probable-v2-top12000.txt', dtype=str)
+                    common_names = loadtxt('middle-names.txt', dtype=str)
+                    cp = [c for c in common_pass if c == password]
+                    cn = [c for c in common_names if c == password]
+                    cnl = [c.lower() for c in common_names if c.lower() == password]
+
+                    if len(cp) == 1:
+                        print('\nPassword:', cp)
+                        return cp
+                    if len(cn) == 1:
+                        print('\nPassword:', cn)
+                        return cn
+                    if len(cnl) == 1:
+                        print('\nPassword:', cnl)
+                        return cnl
+
+                    print('2) Digits cartesian product')
+                    for l in range(1, 9):
+                        generator = product(string.digits, repeat=int(l))
+                        print("\t..%d digit" % l)
+                        p = product_loop(password, generator)
+                        if p is not False:
+                            return p
+
+                    print('3) Digits + ASCII lowercase')
+                    for l in range(1, max_nchar + 1):
+                        print("\t..%d char" % l)
+                        generator = product(string.digits + string.ascii_lowercase,
+                                            repeat=int(l))
+                        p = product_loop(password, generator)
+                        if p is not False:
+                            return p
+
+                    print('4) Digits + ASCII lower / upper + punctuation')
+                    # If it fails, we start brute-forcing the 'hard' way
+                    # Same as possible_char = string.printable[:-5]
+                    all_char = string.digits + string.ascii_letters + string.punctuation
+
+                    for l in range(1, max_nchar + 1):
+                        print("\t..%d char" % l)
+                        generator = product(all_char, repeat=int(l))
+                        p = product_loop(password, generator)
+                        if p is not False:
+                                return p
+                    
+                else:
+                    CTkMessagebox(title="Error", message="Hasło dłuższe niż 9 cyfr", icon="cancel")
+                
+                    
 
 
         def button_password():
             get_password()
-            print()
+            
         def button_location():
             get_location()
         def button_brutforce():
-            brutforce
-
+            
+            dialog = customtkinter.CTkInputDialog(text="Wpisz hasło składające się z 10 znaków", title="Bruteforce")
+            if dialog <10:
+                start = time()
+                bruteforce(dialog.get_input())
+                end = time()
+                x = ('Total time: %.2f seconds' % (end - start))
+                print(x)
+                CTkMessagebox(title ="Czas hakowania hasła",message="Hasło zostało schakowane",
+                        icon="check", option_1="Thanks",)
+  
         self.title("Ethical Hacking")
         self.geometry(f"{950}x{650}")
         self.resizable(False,False)
+        # ##logowanie
+        #  # load and create background image
+        # current_path = os.path.dirname(os.path.realpath(__file__))
+        # self.bg_image = customtkinter.CTkImage(Image.open(current_path + "/test_images/kali.jpg"),
+        #                                        size=(self.width, self.height))
+        # self.bg_image_label = customtkinter.CTkLabel(self, image=self.bg_image)
+        # self.bg_image_label.grid(row=0, column=0)
 
-        # configure grid layout (2x2)
+        # # create login frame
+        # self.login_frame = customtkinter.CTkFrame(self, corner_radius=0)
+        # self.login_frame.grid(row=0, column=0, sticky="ns")
+        # self.login_label = customtkinter.CTkLabel(self.login_frame, text="CustomTkinter\nLogin Page",
+        #                                           font=customtkinter.CTkFont(size=20, weight="bold"))
+        # self.login_label.grid(row=0, column=0, padx=30, pady=(150, 15))
+        # self.username_entry = customtkinter.CTkEntry(self.login_frame, width=200, placeholder_text="username")
+        # self.username_entry.grid(row=1, column=0, padx=30, pady=(15, 15))
+        # self.password_entry = customtkinter.CTkEntry(self.login_frame, width=200, show="*", placeholder_text="password")
+        # self.password_entry.grid(row=2, column=0, padx=30, pady=(0, 15))
+        # self.login_button = customtkinter.CTkButton(self.login_frame, text="Login", command=self.login_event, width=200)
+        # self.login_button.grid(row=3, column=0, padx=30, pady=(15, 15))
+        ## okno główne
+        
         self.grid_columnconfigure(1, weight=1)
         self.grid_rowconfigure((0, 1, 2), weight=1)
         ##hak1
@@ -196,6 +305,11 @@ class App(customtkinter.CTk):
         self.sidebar_button_3.grid(row=2, column=1, padx=20, pady=10)
         
         self.textbox1.insert("0.0","tekst")
+    # def login_event(self):
+    #         print("Login pressed - username:", self.username_entry.get(), "password:", self.password_entry.get())
+
+    #         self.login_frame.grid_forget()  # remove login frame
+    #         self.main_frame.grid(row=0, column=0, sticky="nsew")  # show main frame
 if __name__ == "__main__":
     app = App()
     app.mainloop()

@@ -83,15 +83,15 @@ class App(customtkinter.CTk):
         self.textbox3.grid(row=2, column=0, padx=20, pady=10, sticky="nsew")
         self.sidebar_button_3 = customtkinter.CTkButton(self.main_frame, command=self.button_brutforce, height=180, width=300, text='Bruteforce Attack Start')
         self.sidebar_button_3.grid(row=2, column=1, padx=20, pady=10)
-        with open("nazwa_pliku.txt", "r") as file:
-            hak1 = file.read()
-        with open("nazwa_pliku.txt", "r") as file:
-            hak2 = file.read()
-        with open("nazwa_pliku.txt", "r") as file:
-            hak3 = file.read()   
-        self.textbox1.insert("0.0",hak1)
-        self.textbox2.insert("0.0",hak2)
-        self.textbox3.insert("0.0",hak3)
+          
+        self.textbox1.insert("0.0","""Password hack jest to potencjalnie bardzo niebezpieczny sposób ataku, który można przeprowadzić na wiele sposobów. Program bądź skrypt napisany przez hakera może zostać w prosty sposób przesłany na urządzenie ofiary poprzez email, link na stronie internetowej, urządzenie typu rober ducky lub poprzez zwykłego pendraiwa.  Atak ten działa na bardzo prostej zasadzie i wykorzystuje konsole CMD. Skrypt emituje sekwencje klawiszy aby otworzyć wiersz polecenia i wpisuje odpowiednie komendy aby uzyskać dostęp do nazw, adresów ip, adresów MAC i haseł zapisanych sieci Wi-Fi. Aby uchronić się przed takim atakiem należy mieć na swoim urządzeniu zainstalowanego dobrego antywirusa oraz nie klikać w podejrzane linki. """)
+        self.textbox2.insert("0.0","""Location hack bazuje na danych EXIF (zwane także Metadanymi). Jest to zbiór danych zawierający informacje o parametrach, jakie ustawione były do zrobienia danego zdjęcia, informacje o wykorzystanym aparacie/ smartfonie, informacje odnośnie praw autorskich i informacje o lokalizacji. Wiele stron na które umożliwiają udostępnianie zdjęć posiadają odpowiednie zabezpieczenia, które usuwają metadane. Niestety wiele blogów, stron aukcyjnych i tym podobnych nie oferują takiego typu zabezpieczeń. Sam program działa na zasadzie wyodrębnienia danych o lokalizacji i przetworzeniu ich na użyteczne współrzędne geograficzne, które są wpisywane w Google Maps aby pokazać dokładną lokalizacje.""")
+        self.textbox3.insert("0.0","""Brute-force attack to jedna z metod rozszyfrowujący hasła oraz klucze kryptograficzne. Hakerzy przy pomocy napisanych skryptów lub dostępnych narzędzi do łamania haseł próbują "wpisać" wszystkie możliwe kombinacje znaków, które mogą stworzyć hasło, a następnie "testują" ich prawidłowość. Proces ten jest powtarzany przez "narzędzia" do momentu aż trafią one na właściwe rozwiązanie.
+W tym programie użyte zostały dwie metody łamania haseł, atak słownikowy i "Hard Brute Force Atack". Dodatkowym popularnym rozwiązaniem jest hybrydowy atak słownikowy, który nie został zaimplementowany.
+Atak słownikowy - atak używa słownika, aby znaleźć hasło. Używane są do tego najpopularniejsze hasła, a następnie podejmowana jest próba wpisania ich jako hało.
+Atak "Hard Brute Force Atack" - polega na wpisywaniu po koleji ciągów zanków do dogadnięcia hasła. W tym programie zostało to ograniczone do 10 znaków ze względu na płynność działania.
+Hybrydowy atak słownikowy - jest połączeniem obu powyższych ataków.
+""")
     def login_event(self):
         print("Login pressed - username:", self.username_entry.get(), "password:", self.password_entry.get())
 

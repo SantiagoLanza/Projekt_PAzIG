@@ -84,7 +84,7 @@ class App(customtkinter.CTk):
         self.sidebar_button_3 = customtkinter.CTkButton(self.main_frame, command=self.button_brutforce, height=180, width=300, text='Bruteforce Attack Start')
         self.sidebar_button_3.grid(row=2, column=1, padx=20, pady=10)
           
-        self.textbox1.insert("0.0","""Password hack jest to potencjalnie bardzo niebezpieczny sposób ataku, który można przeprowadzić na wiele sposobów. Program bądź skrypt napisany przez hakera może zostać w prosty sposób przesłany na urządzenie ofiary poprzez email, link na stronie internetowej, urządzenie typu rober ducky lub poprzez zwykłego pendraiwa.  Atak ten działa na bardzo prostej zasadzie i wykorzystuje konsole CMD. Skrypt emituje sekwencje klawiszy aby otworzyć wiersz polecenia i wpisuje odpowiednie komendy aby uzyskać dostęp do nazw, adresów ip, adresów MAC i haseł zapisanych sieci Wi-Fi. Aby uchronić się przed takim atakiem należy mieć na swoim urządzeniu zainstalowanego dobrego antywirusa oraz nie klikać w podejrzane linki. """)
+        self.textbox1.insert("0.0","""Password hack jest to potencjalnie bardzo niebezpieczny sposób ataku, który można przeprowadzić na wiele sposobów. Program bądź skrypt napisany przez hakera może zostać w prosty sposób przesłany na urządzenie ofiary poprzez email, link na stronie internetowej, urządzenie typu rober ducky lub poprzez zwykłego pendraiwa.  Atak ten działa na bardzo prostej zasadzie i wykorzystuje konsole CMD. Skrypt emituje sekwencje klawiszy aby otworzyć wiersz polecenia i wpisuje odpowiednie komendy aby uzyskać dostęp do nazw i haseł zapisanych sieci Wi-Fi (możliwe jest uzyskanie adresów ip, adresów MAC). Aby uchronić się przed takim atakiem należy mieć na swoim urządzeniu zainstalowanego dobrego antywirusa oraz nie klikać w podejrzane linki. """)
         self.textbox2.insert("0.0","""Location hack bazuje na danych EXIF (zwane także Metadanymi). Jest to zbiór danych zawierający informacje o parametrach, jakie ustawione były do zrobienia danego zdjęcia, informacje o wykorzystanym aparacie/ smartfonie, informacje odnośnie praw autorskich i informacje o lokalizacji. Wiele stron na które umożliwiają udostępnianie zdjęć posiadają odpowiednie zabezpieczenia, które usuwają metadane. Niestety wiele blogów, stron aukcyjnych i tym podobnych nie oferują takiego typu zabezpieczeń. Sam program działa na zasadzie wyodrębnienia danych o lokalizacji i przetworzeniu ich na użyteczne współrzędne geograficzne, które są wpisywane w Google Maps aby pokazać dokładną lokalizacje.""")
         self.textbox3.insert("0.0","""Brute-force attack to jedna z metod rozszyfrowujący hasła oraz klucze kryptograficzne. Hakerzy przy pomocy napisanych skryptów lub dostępnych narzędzi do łamania haseł próbują "wpisać" wszystkie możliwe kombinacje znaków, które mogą stworzyć hasło, a następnie "testują" ich prawidłowość. Proces ten jest powtarzany przez "narzędzia" do momentu aż trafią one na właściwe rozwiązanie.
 W tym programie użyte zostały dwie metody łamania haseł, atak słownikowy i "Hard Brute Force Atack". Dodatkowym popularnym rozwiązaniem jest hybrydowy atak słownikowy, który nie został zaimplementowany.
@@ -101,15 +101,14 @@ Hybrydowy atak słownikowy - jest połączeniem obu powyższych ataków.
     
     def button_brutforce(self):
             
-            dialog = customtkinter.CTkInputDialog(text="Wpisz hasło składające się z 10 znaków", title="Bruteforce")
+            self.dialog = customtkinter.CTkInputDialog(text="Wpisz hasło składające się z 10 znaków", title="Bruteforce")
             
             start = time()
-            self.bruteforce(dialog.get_input())
+            self.bruteforce(self.dialog.get_input())
             end = time()
             x = ('Total time: %.2f seconds' % (end - start))
             print(x)
-            CTkMessagebox(title ="Czas hakowania hasła",message="Hasło zostało schakowane",
-                        icon="check", option_1="Thanks",)
+            ##CTkMessagebox(title ="Czas hakowania hasła",message="Hasło zostało schakowane",icon="check", option_1="Thanks",)
     def back_event(self):
         self.main_frame.grid_forget()  # remove main frame
         self.login_frame.grid(row=0, column=0, sticky="ns")  # show login frame
@@ -196,7 +195,7 @@ Hybrydowy atak słownikowy - jest połączeniem obu powyższych ataków.
         os.chdir(os.path.join(cwd, "images"))
            
         files = os.listdir()
-
+        
            
         if len(files) == 0:
             print("You don't have have files in the ./images folder.")
@@ -237,7 +236,7 @@ Hybrydowy atak słownikowy - jest połączeniem obu powyższych ataków.
                             
                             
                          
-                        if gps_coords:
+                    if gps_coords:
                             print(create_google_maps_url(gps_coords))
                             webbrowser.open(create_google_maps_url(gps_coords))
                         
@@ -246,7 +245,7 @@ Hybrydowy atak słownikowy - jest połączeniem obu powyższych ataków.
  
 
        
-    def product_loop(password, generator):
+    def product_loop(self,password, generator):
             for p in generator:
                 if ''.join(p) == password:
                     print('\nPassword:', ''.join(p))
@@ -255,24 +254,10 @@ Hybrydowy atak słownikowy - jest połączeniem obu powyższych ataków.
 
 
     def bruteforce(self,password, max_nchar=8):
-                """Password brute-force algorithm.
-
-                Parameters
-                ----------
-                password : string
-                    To-be-found password.
-                max_nchar : int
-                    Maximum number of characters of password.
-
-                Return
-                ------
-                bruteforce_password : string
-                    Brute-forced password
-                """
+                
                 dlugosc = len(password)
                 if dlugosc < 10:
-                    CTkMessagebox(message="Hasło zostało schakowane",
-                  icon="check", option_1="Thanks")
+                    
                     print('1) Comparing with most common passwords / first names')
                     common_pass = loadtxt('probable-v2-top12000.txt', dtype=str)
                     common_names = loadtxt('middle-names.txt', dtype=str)
@@ -282,12 +267,15 @@ Hybrydowy atak słownikowy - jest połączeniem obu powyższych ataków.
 
                     if len(cp) == 1:
                         print('\nPassword:', cp)
+                        CTkMessagebox(message="Hasło zostało złamane",icon="check", option_1="Thanks")
                         return cp
                     if len(cn) == 1:
                         print('\nPassword:', cn)
+                        CTkMessagebox(message="Hasło zostało złamane",icon="check", option_1="Thanks")
                         return cn
                     if len(cnl) == 1:
                         print('\nPassword:', cnl)
+                        CTkMessagebox(message="Hasło zostało złamane",icon="check", option_1="Thanks")
                         return cnl
 
                     print('2) Digits cartesian product')
@@ -296,7 +284,9 @@ Hybrydowy atak słownikowy - jest połączeniem obu powyższych ataków.
                         print("\t..%d digit" % l)
                         p = self.product_loop(password, generator)
                         if p is not False:
+                            CTkMessagebox(message="Hasło zostało złamane",icon="check", option_1="Thanks")
                             return p
+                            
 
                     print('3) Digits + ASCII lowercase')
                     for l in range(1, max_nchar + 1):
@@ -305,11 +295,12 @@ Hybrydowy atak słownikowy - jest połączeniem obu powyższych ataków.
                                             repeat=int(l))
                         p = self.product_loop(password, generator)
                         if p is not False:
+                            CTkMessagebox(message="Hasło zostało złamane",icon="check", option_1="Thanks")
                             return p
+                            
 
                     print('4) Digits + ASCII lower / upper + punctuation')
-                    # If it fails, we start brute-forcing the 'hard' way
-                    # Same as possible_char = string.printable[:-5]
+                    
                     all_char = string.digits + string.ascii_letters + string.punctuation
 
                     for l in range(1, max_nchar + 1):
@@ -317,15 +308,19 @@ Hybrydowy atak słownikowy - jest połączeniem obu powyższych ataków.
                         generator = product(all_char, repeat=int(l))
                         p = self.product_loop(password, generator)
                         if p is not False:
+                                CTkMessagebox(message="Hasło zostało złamane",icon="check", option_1="Thanks")
                                 return p
+                        
+                   
                     
                 else:
-                    CTkMessagebox(title="Error", message="Hasło dłuższe niż 9 cyfr", icon="cancel")
+                    CTkMessagebox(title="Error", message="Hasło dłuższe niż 9 znaków", icon="cancel")
     def button_password(self):
-            self.get_password()
+        self.get_password()
             
     def button_location(self):
-            self.get_location()
+        self.get_location()
+
 if __name__ == "__main__":
     app = App()
     app.mainloop()
